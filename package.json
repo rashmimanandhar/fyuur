@@ -11,5 +11,13 @@
   "license": "ISC",
   "dependencies": {
     "bootstrap": "^3.4.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rashmimanandhar/fyuur.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rashmimanandhar/fyuur/issues"
+  },
+  "homepage": "https://github.com/rashmimanandhar/fyuur#readme"
 }
