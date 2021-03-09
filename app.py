@@ -42,6 +42,7 @@ show_venue = db.Table('show_venue',
     db.Column('venue_id', db.Integer, db.ForeignKey('Venue.id'), primary_key=True)
 )
 
+
 class Venue(db.Model):
     __tablename__ = 'Venue'
     
@@ -56,7 +57,7 @@ class Venue(db.Model):
     website = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(500), nullable=True)
-    genres = db.Column(db.ARRAY(db.String), nullable=False)
+    genres = db.Column(db.String(120), nullable=False)
     shows = db.relationship('Show', secondary=show_venue,
       backref=db.backref('venue', lazy=True))
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
@@ -257,7 +258,6 @@ def create_venue_submission():
   reqData = request.get_json()
   print(reqData)
   try:
-    print('name '+reqData['name'], 'city '+reqData['city'], 'state '+reqData['state'], 'address '+reqData['address'], 'phone '+reqData['phone'])
     venue = Venue(name=reqData['name'], city=reqData['city'], state=reqData['state'], address=reqData['address'], phone=reqData['phone'], genres=reqData['genres'], facebook_link=reqData['facebook_link'])
     db.session.add(venue)
     print(venue)

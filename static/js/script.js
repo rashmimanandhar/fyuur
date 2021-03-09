@@ -4,12 +4,16 @@ window.parseISOString = function parseISOString(s) {
 };
 document.getElementById('venue-form').onsubmit = (e) => {
   e.preventDefault();
-  console.log(e);
+  var select = document.querySelector('.genres');
+  var selected = [...select.options]
+                    .filter(option => option.selected)
+                    .map(option => option.value);
+  console.log(selected, 3290);
   const data = new FormData(event.target);
   
   const formData = Object.fromEntries(data.entries());
+  formData['genres'] = selected;
   console.log(formData);
-  console.log(JSON.stringify(formData));
   fetch('/venues/create', {
     method: 'POST',
     body: JSON.stringify(formData),
