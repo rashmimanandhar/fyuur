@@ -52,7 +52,7 @@ class Venue(db.Model):
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
     def __repr__(self):
-      return f'<Venue: {self.id}, name: {self.name}, city:{self.city}, state: {self.state}, address: {self.address}, phone: {self.phone}, image_link: {self.image_link},facebook_link: {self.facebook_link}, website: {self.website}, seeking_talent: {self.seeking_talent}, seeking_desc: {self.seeking_description}, genres: {self.genres}, shows: {self.shows}>'
+      return f'<Venue: {self.id}, name: {self.name}, city:{self.city}, state: {self.state}, address: {self.address}, phone: {self.phone}, image_link: {self.image_link},facebook_link: {self.facebook_link}, website: {self.website}, seeking_talent: {self.seeking_talent}, seeking_desc: {self.seeking_description}, genres: {self.genres}>'
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
@@ -71,7 +71,7 @@ class Artist(db.Model):
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
     def __repr__(self):
-      return f'<Artist: {self.id}, name: {self.name}, city:{self.city}, state: {self.state}, phone: {self.phone}, image_link: {self.image_link},facebook_link: {self.facebook_link}, genres: {self.genres}, shows: {self.shows}>'
+      return f'<Artist: {self.id}, name: {self.name}, city:{self.city}, state: {self.state}, phone: {self.phone}, image_link: {self.image_link},facebook_link: {self.facebook_link}, genres: {self.genres}>'
 
 
 class Show(db.Model):
@@ -116,52 +116,32 @@ def index():
 
 @app.route('/venues')
 def venues():
-  # TODO: replace with real venues data.
-  #       num_shows should be aggregated based on number of upcoming shows per venue.
-  # cur = conn.cursor()
-  # cur.execute("""select city, state, (select json_agg(venue) from (select id as id, name as name) venue) As venues from 'Venue'""")
-  # rows = cur.fetchall();
-  # print(rows)
-  # venue = Venue.query.all()
-  # print(venue)
+  venues = Venue.query.all()
+  places = Venue.query.distinct(Venue.city, Venue.state).all()
+  data = []
+  for place in places:
+    venue_info = {
+      'city': place.city,
+      'state': place.state,
+      'venues': []
+    }
 
-  venues = Venue.query.with_entities('id','name')
-  venueJson = Venue.query.with_entities(func.json_agg(venues))
-  datum = Venue.query.with_entities('city', 'state')
-  print(venueJson)
-  # case_list = []
-  # for venue in venues:
-  #   orderedData = {
-      
-  #         venue.city : {
-  #           venue.id, venue.name, venue.city
-  #         }
-      
-  #   }
-  #   case_list.append(orderedData)
-  # print(case_list)
-  data=[{
-    "city": "San Francisco",
-    "state": "CA",
-    "venues": [{
-      "id": 1,
-      "name": "The Musical Hop",
-      "num_upcoming_shows": 0,
-    }, {
-      "id": 3,
-      "name": "Park Square Live Music & Coffee",
-      "num_upcoming_shows": 1,
-    }]
-  }, {
-    "city": "New York",
-    "state": "NY",
-    "venues": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
-  }]
-  print('we are in venues page')
+    place_venues = []
+    for venue in venues:
+      if venue.city == place.city and venue.state == place.state:
+        num_upcoming_shows = []
+        for show in venue.shows:
+          if show.start_time > datetime.now():
+            num_upcoming_shows.append(show)
+        place_venues.append({
+          'id': venue.id,
+          'name': venue.name,
+          'num_upcoming_shows': len(num_upcoming_shows)
+        })
+    venue_info['venues']=place_venues
+    data.append(venue_info)
+  print(data);
+
   return render_template('pages/venues.html', areas=data);
 
 @app.route('/venues/search', methods=['POST'])
