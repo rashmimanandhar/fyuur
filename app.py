@@ -302,13 +302,8 @@ def create_venue_submission():
     print('added')
     flash('Venue ' + reqData['name'] + ' was successfully listed!')
   
-  # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
 
-  # on successful db insert, flash success
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
   return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
@@ -494,14 +489,38 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
-  # called upon submitting the new artist listing form
-  # TODO: insert form data as a new Venue record in the db, instead
+  form = ArtistForm(request.form)
+  print(form)
+  error = False
+  reqData = request.form
+  try:
+    artist = Artist(name=reqData['name'], city=reqData['city'], state=reqData['state'], phone=reqData['phone'], genres=reqData.getlist('genres'), facebook_link=reqData['facebook_link'])
+    db.session.add(artist)
+    print(artist)
+    db.session.commit()
+    print(artist.id)
+    print("commit")
+  except:
+    error = True
+    e = sys.exc_info()[0]
+    traceback.print_exc() 
+    print( "<p>Error: %s</p>" % e )
+    print('rolling back')
+    flash('An error occurred. Venue ' + reqData['name'] + ' could not be listed.')
+    db.session.rollback()
+  finally:
+    print("close session")
+    db.session.close()
+  if error:
+    print("error")
+    abort (400)
+  else:
+    print('added')
+  flash('Artist ' + request.form['name'] + ' was successfully listed!')
+
+ 
   # TODO: modify data to be the data object returned from db insertion
 
-  # on successful db insert, flash success
-  flash('Artist ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
   return render_template('pages/home.html')
 
 
