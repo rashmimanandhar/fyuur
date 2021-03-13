@@ -140,7 +140,6 @@ def venues():
         })
     venue_info['venues']=place_venues
     data.append(venue_info)
-  print(data);
 
   return render_template('pages/venues.html', areas=data);
 
@@ -254,32 +253,24 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
   form = VenueForm(request.form)
-  print(form)
   error = False
   reqData = request.form
   try:
     venue = Venue(name=reqData['name'], city=reqData['city'], state=reqData['state'], address=reqData['address'], phone=reqData['phone'], genres=reqData.getlist('genres'), facebook_link=reqData['facebook_link'])
     db.session.add(venue)
-    print(venue)
     db.session.commit()
-    print(venue.id)
-    print("commit")
   except:
     error = True
     e = sys.exc_info()[0]
     traceback.print_exc() 
     print( "<p>Error: %s</p>" % e )
-    print('rolling back')
     flash('An error occurred. Venue ' + reqData['name'] + ' could not be listed.')
     db.session.rollback()
   finally:
-    print("close session")
     db.session.close()
   if error:
-    print("error")
     abort (400)
   else:
-    print('added')
     flash('Venue ' + reqData['name'] + ' was successfully listed!')
   
   # TODO: modify data to be the data object returned from db insertion
@@ -470,33 +461,25 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
   form = ArtistForm(request.form)
-  print(form)
   error = False
   reqData = request.form
   try:
     artist = Artist(name=reqData['name'], city=reqData['city'], state=reqData['state'], phone=reqData['phone'], genres=reqData.getlist('genres'), facebook_link=reqData['facebook_link'])
     db.session.add(artist)
-    print(artist)
     db.session.commit()
-    print(artist.id)
-    print("commit")
   except:
     error = True
     e = sys.exc_info()[0]
     traceback.print_exc() 
     print( "<p>Error: %s</p>" % e )
-    print('rolling back')
     flash('An error occurred. Venue ' + reqData['name'] + ' could not be listed.')
     db.session.rollback()
   finally:
-    print("close session")
     db.session.close()
   if error:
-    print("error")
     abort (400)
   else:
-    print('added')
-  flash('Artist ' + request.form['name'] + ' was successfully listed!')
+    flash('Artist ' + request.form['name'] + ' was successfully listed!')
 
  
   # TODO: modify data to be the data object returned from db insertion
@@ -566,24 +549,19 @@ def create_show_submission():
     show = Show(artist_id=reqData['artist_id'], venue_id=reqData['venue_id'], start_time=reqData['start_time'])
     db.session.add(show)
     db.session.commit()
-    print("commit")
   except:
     error = True
     e = sys.exc_info()[0]
     traceback.print_exc() 
     print( "<p>Error: %s</p>" % e )
-    print('rolling back')
     flash('An error occurred. Venue ' + reqData['name'] + ' could not be listed.')
     db.session.rollback()
   finally:
-    print("close session")
     db.session.close()
   if error:
-    print("error")
     abort (400)
   else:
-    print('added')
-  flash('Show was successfully listed!')
+    flash('Show was successfully listed!')
   
   return render_template('pages/home.html')
 
