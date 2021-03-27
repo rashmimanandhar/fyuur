@@ -331,9 +331,20 @@ def create_artist_form():
 def create_artist_submission():
   form = ArtistForm(request.form)
   error = False
-  reqData = request.form
   try:
-    artist = Artist(name=reqData['name'], city=reqData['city'], state=reqData['state'], phone=reqData['phone'], genres=reqData.getlist('genres'), facebook_link=reqData['facebook_link'])
+    name = request.form['name']
+    city = request.form['city']
+    state = request.form['state']
+    phone = request.form['phone']
+    genres = request.form.getlist('genres'),
+    facebook_link = request.form['facebook_link']
+    image_link = request.form['image_link']
+    website = request.form['website']
+    seeking_venue = True if 'seeking_venue' in request.form else False
+    seeking_description = request.form['seeking_description']
+
+    artist = Artist(name=name, city=city, state=state, phone=phone, genres=genres, facebook_link=facebook_link, image_link=image_link, website=website, seeking_venue=seeking_venue, seeking_description=seeking_description)
+    
     db.session.add(artist)
     db.session.commit()
   except:
