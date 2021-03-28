@@ -31,8 +31,12 @@ class Venue(db.Model):
     seeking_talent = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(500), nullable=True)
     genres = db.Column(db.ARRAY(db.String()))
-    shows = db.relationship('shows',
-                            backref=db.backref('venues', lazy=True))
+    shows = db.relationship(
+        'Show',
+        backref='venue',
+        lazy='joined',
+        cascade="all, delete"
+    )
 
     def __repr__(self):
       return f'<Venue: {self.id}, name: {self.name}, city:{self.city}, state: {self.state}, address: {self.address}, phone: {self.phone}, image_link: {self.image_link},facebook_link: {self.facebook_link}, website: {self.website}, seeking_talent: {self.seeking_talent}, seeking_desc: {self.seeking_description}, genres: {self.genres}>'
@@ -52,8 +56,8 @@ class Artist(db.Model):
     seeking_venue = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(500), nullable=True)
     facebook_link = db.Column(db.String(120))
-    shows = db.relationship('shows',
-                            backref=db.backref('artists', lazy=True))
+    shows = db.relationship('Show',
+                            backref=db.backref('artist', lazy=True))
 
     def __repr__(self):
       return f'<Artist: {self.id}, name: {self.name}, city:{self.city}, state: {self.state}, phone: {self.phone}, image_link: {self.image_link},facebook_link: {self.facebook_link}, genres: {self.genres}>'
