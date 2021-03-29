@@ -144,9 +144,9 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-  form = VenueForm(request.form)
+  form = VenueForm(request.form, meta={'csrf': False})
   error = True
-  if not form.validate_on_submit():
+  if not form.validate():
     error = False
     try:
       name = form.name.data,
@@ -174,10 +174,15 @@ def create_venue_submission():
       db.session.rollback()
     finally:
       db.session.close()
-  if error:
-    abort (400)
+    if error:
+      abort (400)
+    else:
+      flash('Venue ' + form.name.data + ' was successfully listed!')
   else:
-    flash('Venue ' + form.name.data + ' was successfully listed!')
+    message = []
+    for field, err in form.erros.items():
+      message.append(field + ' ' + '|'.join(err))
+    flash('Errors '+ str(message))
   
   return render_template('pages/home.html')
 
@@ -328,40 +333,44 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
   form = ArtistForm(request.form)
-  error = False
-  try:
-    name = form.name.data
-    city = form.city.data
-    state = form.state.data
-    phone = form.phone.data
-    genres = form.genres.data,
-    facebook_link = form.facebook_link.data
-    image_link = form.image_link.data
-    website = form.website.data
-    seeking_venue = True if 'seeking_venue' in request.form else False
-    seeking_description = form.seeking_description.data
+  error = True
+  if not form.validate():
+    error = False
+    try:
+      name = form.name.data
+      city = form.city.data
+      state = form.state.data
+      phone = form.phone.data
+      genres = form.genres.data,
+      facebook_link = form.facebook_link.data
+      image_link = form.image_link.data
+      website = form.website.data
+      seeking_venue = True if 'seeking_venue' in request.form else False
+      seeking_description = form.seeking_description.data
 
-    artist = Artist(name=name, city=city, state=state, phone=phone, genres=genres, facebook_link=facebook_link, image_link=image_link, website=website, seeking_venue=seeking_venue, seeking_description=seeking_description)
-    
-    db.session.add(artist)
-    db.session.commit()
-  except:
-    error = True
-    e = sys.exc_info()[0]
-    traceback.print_exc() 
-    print( "<p>Error: %s</p>" % e )
-    flash('An error occurred. Venue ' + reqData['name'] + ' could not be listed.')
-    db.session.rollback()
-  finally:
-    db.session.close()
-  if error:
-    abort (400)
+      artist = Artist(name=name, city=city, state=state, phone=phone, genres=genres, facebook_link=facebook_link, image_link=image_link, website=website, seeking_venue=seeking_venue, seeking_description=seeking_description)
+      
+      db.session.add(artist)
+      db.session.commit()
+    except:
+      error = True
+      e = sys.exc_info()[0]
+      traceback.print_exc() 
+      print( "<p>Error: %s</p>" % e )
+      flash('An error occurred. Venue ' + reqData['name'] + ' could not be listed.')
+      db.session.rollback()
+    finally:
+      db.session.close()
+    if error:
+      abort (400)
+    else:
+      flash('Artist ' + request.form['name'] + ' was successfully listed!')
   else:
-    flash('Artist ' + request.form['name'] + ' was successfully listed!')
-
+      message = []
+      for field, err in form.erros.items():
+        message.append(field + ' ' + '|'.join(err))
+      flash('Errors ' + str(message))
  
-  # TODO: modify data to be the data object returned from db insertion
-
   return render_template('pages/home.html')
 
 

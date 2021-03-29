@@ -6,26 +6,21 @@ import re
 from enums import Genre, State
 
 
-def validate_phone(form, phone):
+def is_valid_phone(self, number):
     """ Validate phone numbers like:
     1234567890 - no space
     123.456.7890 - dot separator
     123-456-7890 - dash separator
     123 456 7890 - space separator
-
     Patterns:
     000 = [0-9]{3}
     0000 = [0-9]{4}
     -.  = ?[-. ]
-
     Note: (? = optional) - Learn more: https://regex101.com/
     """
-    regex = re.match(
-        '^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$', phone.data)
-    if not regex:
-        print("error")
-        raise ValidationError("Invalid input syntax")
-
+    print(number.data)
+    if not re.search(r"^[0-9]{3}-[0-9]{3}-[0-9]{4}$", number.data):
+        raise ValidationError("Invalid phone number.")
 
 
 
@@ -58,7 +53,7 @@ class VenueForm(Form):
     )
     phone = StringField(
         'phone',
-        validators=[
+        validators=[is_valid_phone,
             DataRequired()]
     )
     image_link = StringField(
@@ -86,7 +81,7 @@ class VenueForm(Form):
         rv = Form.validate(self)
         if not rv:
             return False
-        if not validate_phone(self.phone.data):
+        if not is_valid_phone(self.phone.data):
             self.phone.errors.append('Invalid phone.')
             return False
         if not set(self.genres.data).issubset(dict(Genre.choices()).keys()):
@@ -110,7 +105,7 @@ class ArtistForm(Form):
         choices=State.choices()
     )
     phone = StringField(
-        'phone', validators=[DataRequired()]
+        'phone', validators=[is_valid_phone, DataRequired()]
     )
     image_link = StringField(
         'image_link'
@@ -135,7 +130,7 @@ class ArtistForm(Form):
         rv = Form.validate(self)
         if not rv:
             return False
-        if not validate_phone(self.phone.data):
+        if not is_valid_phone(self.phone.data):
             self.phone.errors.append('Invalid phone.')
             return False
         if not set(self.genres.data).issubset(dict(Genre.choices()).keys()):
