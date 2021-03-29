@@ -1,11 +1,12 @@
 from datetime import datetime
 from flask_wtf import Form
-from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
-from wtforms.validators import DataRequired, AnyOf, URL
+from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField, ValidationError
+from wtforms.validators import DataRequired, AnyOf, URL, Regexp
 import re
 from enums import Genre, State
 
-def is_valid_phone(number):
+
+def validate_phone(form, phone):
     """ Validate phone numbers like:
     1234567890 - no space
     123.456.7890 - dot separator
@@ -19,8 +20,13 @@ def is_valid_phone(number):
 
     Note: (? = optional) - Learn more: https://regex101.com/
     """
-    regex = re.compile('^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$')
-    return regex.match(number)
+    regex = re.match(
+        '^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$', phone.data)
+    if not regex:
+        print("error")
+        raise ValidationError("Invalid input syntax")
+
+
 
 
 class ShowForm(Form):
@@ -52,13 +58,13 @@ class VenueForm(Form):
     )
     phone = StringField(
         'phone',
-        validators=[is_valid_phone]
+        validators=[
+            DataRequired()]
     )
     image_link = StringField(
         'image_link'
     )
     genres = SelectMultipleField(
-        # TODO implement enum restriction
         'genres', validators=[DataRequired()],
         choices=Genre.choices()
     )
@@ -77,10 +83,10 @@ class VenueForm(Form):
 
     def validate(self):
         """Define a custom validate method in your Form:"""
-        rv = FlaskForm.validate(self)
+        rv = Form.validate(self)
         if not rv:
             return False
-        if not is_valid_phone(self.phone.data):
+        if not validate_phone(self.phone.data):
             self.phone.errors.append('Invalid phone.')
             return False
         if not set(self.genres.data).issubset(dict(Genre.choices()).keys()):
@@ -104,7 +110,7 @@ class ArtistForm(Form):
         choices=State.choices()
     )
     phone = StringField(
-        'phone', validators=[is_valid_phone]
+        'phone', validators=[DataRequired()]
     )
     image_link = StringField(
         'image_link'
@@ -126,10 +132,10 @@ class ArtistForm(Form):
 
     def validate(self):
         """Define a custom validate method in your Form:"""
-        rv = FlaskForm.validate(self)
+        rv = Form.validate(self)
         if not rv:
             return False
-        if not is_valid_phone(self.phone.data):
+        if not validate_phone(self.phone.data):
             self.phone.errors.append('Invalid phone.')
             return False
         if not set(self.genres.data).issubset(dict(Genre.choices()).keys()):
